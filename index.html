@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EasyGo - Food Delivery</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<!-- HEADER -->
+<header class="bg-pink-600 text-white p-4 flex justify-between items-center">
+  <h1 class="text-2xl font-bold">EasyGo</h1>
+  <div>
+    <button onclick="openAuth('login')" class="bg-white text-pink-600 px-3 py-1 rounded">Login</button>
+    <button onclick="openAuth('signup')" class="bg-white text-pink-600 px-3 py-1 rounded">Sign Up</button>
+  </div>
+</header>
+
+<!-- SEARCH -->
+<div class="p-4 bg-white shadow">
+  <input id="search" onkeyup="searchRestaurants()" placeholder="Search restaurants..." class="w-full p-2 border rounded">
+</div>
+
+<!-- BANNER -->
+<div class="p-6">
+  <div class="bg-pink-100 p-6 rounded">
+    <h2 class="text-2xl font-bold">Free Delivery on First Order</h2>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="p-6">
+  <h2 class="text-xl font-bold mb-3">Categories</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div class="bg-white p-3 rounded shadow">🍕 Pizza</div>
+    <div class="bg-white p-3 rounded shadow">🍔 Burgers</div>
+    <div class="bg-white p-3 rounded shadow">🍜 Asian</div>
+    <div class="bg-white p-3 rounded shadow">🍰 Desserts</div>
+  </div>
+</div>
+
+<!-- RESTAURANTS -->
+<div class="p-6">
+  <h2 class="text-xl font-bold mb-3">Restaurants</h2>
+  <div id="restaurants" class="grid md:grid-cols-3 gap-4"></div>
+</div>
+
+<!-- CART -->
+<div class="fixed bottom-0 right-0 bg-white p-4 shadow w-64">
+  <h3 class="font-bold">Cart</h3>
+  <div id="cartItems"></div>
+  <p class="mt-2">Total: Rs <span id="total">0</span></p>
+  <button onclick="placeOrder()" class="bg-pink-600 text-white w-full mt-2 py-1 rounded">Order</button>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="authModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+  <div class="bg-white p-6 rounded w-80">
+    <h2 id="authTitle" class="text-xl font-bold mb-3"></h2>
+    <input id="user" placeholder="Username" class="border p-2 w-full mb-2">
+    <input id="pass" type="password" placeholder="Password" class="border p-2 w-full mb-2">
+    <button onclick="submitAuth()" class="bg-pink-600 text-white w-full py-2 rounded">Submit</button>
+    <button onclick="closeAuth()" class="mt-2">Close</button>
+  </div>
+</div>
+
+<script>
+let mode = 'login';
+let cart = [];
+let restaurants = [
+  {name:'Burger House', category:'Fast Food', time:'30 mins', price:500},
+  {name:'Pizza Point', category:'Pizza', time:'25 mins', price:800},
+  {name:'Desi Dhaba', category:'Desi', time:'20 mins', price:400},
+  {name:'Asian Wok', category:'Asian', time:'35 mins', price:600}
+];
+
+function loadRestaurants(list = restaurants) {
+  const container = document.getElementById('restaurants');
+  container.innerHTML = '';
+  list.forEach(r => {
+    container.innerHTML += `
+      <div class="bg-white p-4 rounded shadow">
+        <h3 class="font-bold">${r.name}</h3>
+        <p>${r.category}</p>
+        <p>${r.time}</p>
+        <button onclick="addToCart('${r.name}', ${r.price})" class="bg-pink-600 text-white px-3 py-1 mt-2 rounded">Add</button>
+      </div>`;
+  });
+}
+
+function searchRestaurants() {
+  const value = document.getElementById('search').value.toLowerCase();
+  const filtered = restaurants.filter(r => r.name.toLowerCase().includes(value));
+  loadRestaurants(filtered);
+}
+
+function addToCart(name, price) {
+  cart.push({name, price});
+  updateCart();
+}
+
+function updateCart() {
+  const cartDiv = document.getElementById('cartItems');
+  const totalDiv = document.getElementById('total');
+  cartDiv.innerHTML = '';
+  let total = 0;
+
+  cart.forEach(item => {
+    cartDiv.innerHTML += `<p>${item.name} - Rs ${item.price}</p>`;
+    total += item.price;
+  });
+
+  totalDiv.innerText = total;
+}
+
+function placeOrder() {
+  if (cart.length === 0) {
+    alert('Cart is empty');
+    return;
+  }
+  alert('Order placed successfully!');
+  cart = [];
+  updateCart();
+}
+
+function openAuth(type) {
+  mode = type;
+  document.getElementById('authTitle').innerText = type === 'login' ? 'Login' : 'Sign Up';
+  document.getElementById('authModal').classList.remove('hidden');
+}
+
+function closeAuth() {
+  document.getElementById('authModal').classList.add('hidden');
+}
+
+function submitAuth() {
+  const u = document.getElementById('user').value;
+  const p = document.getElementById('pass').value;
+
+  if (!u || !p) return alert('Fill all fields');
+
+  if (mode === 'signup') {
+    localStorage.setItem('user', u);
+    localStorage.setItem('pass', p);
+    alert('Signup successful');
+  } else {
+    const su = localStorage.getItem('user');
+    const sp = localStorage.getItem('pass');
+
+    if (u === su && p === sp) {
+      alert('Login successful');
+    } else {
+      alert('Invalid credentials');
+    }
+  }
+
+  closeAuth();
+}
+
+loadRestaurants();
+</script>
+
+</body>
+</html>
